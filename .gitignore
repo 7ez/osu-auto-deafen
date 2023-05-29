@@ -1,0 +1,6 @@
+osu-auto-deafen/.nuget/
+osu-auto-deafen/bin/
+osu-auto-deafen/obj/
+packages/
+.idea/
+osu-auto-deafen.sln.DotSettings.user
