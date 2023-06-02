@@ -45,6 +45,7 @@ namespace osu_auto_deafen
 
         public async static void DeafenOrUndeafen()
         {
+            _isDeafened = !_isDeafened;
             _isSimulating = true;
             if (KeyCodes.Length > 1)
                 await Simulate
@@ -64,6 +65,7 @@ namespace osu_auto_deafen
         {
             Console.WriteLine("Auto-deafen for osu! by Aochi");
             Console.WriteLine("Keys for deafening: " + string.Join(" + ", KeyCodes));
+            Console.WriteLine($"Deafen point: {_config.Get<string>("DeafenPoint")}%");
             Console.WriteLine("Starting...");
             
             Start:
@@ -110,9 +112,7 @@ namespace osu_auto_deafen
                         Thread.Sleep(3000);
 
                         if (Process.GetProcessesByName("osu!").Length == 0)
-                        {
                             goto Start;
-                        }
 
                         continue;
                     }
@@ -130,20 +130,19 @@ namespace osu_auto_deafen
 
                         if (!_isDeafened)
                         {
-                            if (audioTimeSeconds >= mapLength * 0.4)
-                            {
-                                _isDeafened = !_isDeafened;
+                            if (audioTimeSeconds >= mapLength * _config.GetDeafenPoint())
                                 DeafenOrUndeafen();
-                            }
+                        }
+                        else
+                        {
+                            if (mapLength * _config.GetDeafenPoint() > audioTimeSeconds)
+                                DeafenOrUndeafen();
                         }
                     }
                     else
                     {
                         if (_isDeafened)
-                        {
-                            _isDeafened = !_isDeafened;
                             DeafenOrUndeafen();
-                        }
                     }
 
                     Thread.Sleep(500);

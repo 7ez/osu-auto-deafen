@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using WindowsInput.Events;
@@ -18,19 +19,22 @@ namespace osu_auto_deafen
                 throw new Exception("Config load error.");
         }
 
-        public string Get(string key)
+        public T Get<T>(string key)
         {
             string result;
-            
-            if (_values.TryGetValue(key, out result))
-                return result;
 
-            return null;
+            if (_values.TryGetValue(key, out result))
+            {
+                var converter = TypeDescriptor.GetConverter(typeof(T));
+                return (T)converter.ConvertFromString(result);
+            }
+
+            return default;
         }
 
         public KeyCode[] GetKeyCodes()
         {
-            var keys = Get("Keys");
+            var keys = Get<string>("Keys");
 
             if (keys == null)
                 return null;
@@ -52,6 +56,19 @@ namespace osu_auto_deafen
             }
 
             return keyCodes;
+        }
+
+        public float GetDeafenPoint()
+        {
+            var deafenPoint = Get<int>("DeafenPoint");
+            
+            if (deafenPoint == 0)
+                return 0.4f;
+            
+            if (0 > deafenPoint || deafenPoint > 95)
+                throw new Exception("DeafenPoint must be between 0 and 95.");
+            
+            return deafenPoint / 100f;
         }
         
         private bool Load(string configPath)
