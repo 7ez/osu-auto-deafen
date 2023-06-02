@@ -26,18 +26,28 @@ namespace osu_auto_deafen
         private static float GetMapLength(int MapId)
         {
             if (_lengthCache.TryGetValue(MapId, out var length)) return length;
-            
-            var mapData = _wc.DownloadString($"https://osu.direct/api/b/{MapId}");
-            
-            foreach (var line in mapData.Split('\n'))
+
+            try
             {
-                var new_line = line.Trim();
-                if (new_line.StartsWith("\"TotalLength\":"))
+
+                var mapData = _wc.DownloadString($"https://osu.direct/api/b/{MapId}");
+
+                foreach (var line in mapData.Split('\n'))
                 {
-                    length = float.Parse(new_line.Split(':')[1].Trim().Replace(",", ""));
-                    _lengthCache.Add(MapId, length);
-                    return length;
+                    var new_line = line.Trim();
+                    if (new_line.StartsWith("\"TotalLength\":"))
+                    {
+                        length = float.Parse(new_line.Split(':')[1].Trim().Replace(",", ""));
+                        _lengthCache.Add(MapId, length);
+                        return length;
+                    }
                 }
+            }
+            catch (Exception)
+            {
+                // TODO: grab map length from the user's osu! directory
+                Console.WriteLine("It seems you are playing an unsubmitted map!");
+                Console.WriteLine("As the app has no way to get the map length, you will not be auto-deafened.");
             }
 
             return 0f;
@@ -126,6 +136,10 @@ namespace osu_auto_deafen
                         }
 
                         var mapLength = GetMapLength(beatmap.Id);
+                        
+                        if (mapLength == 0f)
+                            continue;
+                        
                         var audioTimeSeconds = (float)generalData.AudioTime / 1000;
 
                         if (!_isDeafened)
