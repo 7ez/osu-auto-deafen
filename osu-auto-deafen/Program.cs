@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading;
@@ -14,44 +15,13 @@ namespace osu_auto_deafen
 {
     internal class Program
     {
-        private static readonly Dictionary<int, float> _lengthCache = new Dictionary<int, float>();
-        private static readonly WebClient _wc = new WebClient();
         private static readonly Config _config = new Config("./config.ini");
         private static readonly KeyCode[] KeyCodes = _config.GetKeyCodes();
         private static StructuredOsuMemoryReader _osuMemReader;
+        private static BeatmapParser _beatmapParser;
         private static bool _isDeafened;
         private static bool _isSimulating;
         private static int _countKeysPressed;
-
-        private static float GetMapLength(int MapId)
-        {
-            if (_lengthCache.TryGetValue(MapId, out var length)) return length;
-
-            try
-            {
-
-                var mapData = _wc.DownloadString($"https://osu.direct/api/b/{MapId}");
-
-                foreach (var line in mapData.Split('\n'))
-                {
-                    var new_line = line.Trim();
-                    if (new_line.StartsWith("\"TotalLength\":"))
-                    {
-                        length = float.Parse(new_line.Split(':')[1].Trim().Replace(",", ""));
-                        _lengthCache.Add(MapId, length);
-                        return length;
-                    }
-                }
-            }
-            catch (Exception)
-            {
-                // TODO: grab map length from the user's osu! directory
-                Console.WriteLine("It seems you are playing an unsubmitted map!");
-                Console.WriteLine("As the app has no way to get the map length, you will not be auto-deafened.");
-            }
-
-            return 0f;
-        }
 
         public async static void DeafenOrUndeafen()
         {
@@ -81,7 +51,8 @@ namespace osu_auto_deafen
             Start:
             while (true)
             {
-                if (Process.GetProcessesByName("osu!").Length == 0)
+                var osuProcesses = Process.GetProcessesByName("osu!");
+                if (osuProcesses.Length == 0)
                 {
                     Console.WriteLine("osu! is not running.");
                     Console.WriteLine("Waiting for osu! to start...");
@@ -89,6 +60,8 @@ namespace osu_auto_deafen
                 }
                 else
                 {
+                    var osuProcess = osuProcesses.First();
+                    _beatmapParser = new BeatmapParser(osuProcess);
                     break;
                 }
             }
@@ -135,12 +108,9 @@ namespace osu_auto_deafen
                             continue;
                         }
 
-                        var mapLength = GetMapLength(beatmap.Id);
-                        
-                        if (mapLength == 0f)
-                            continue;
-                        
-                        var audioTimeSeconds = (float)generalData.AudioTime / 1000;
+                        var mapLength = _beatmapParser.GetBeatmapLength(beatmap);
+                        var audioTimeSeconds = generalData.AudioTime / 1000f;
+
 
                         if (!_isDeafened)
                         {

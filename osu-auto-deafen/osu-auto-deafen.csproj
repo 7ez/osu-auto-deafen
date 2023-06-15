@@ -34,8 +34,12 @@
     </PropertyGroup>
     <ItemGroup>
         <Reference Include="Microsoft.CSharp" />
+        <Reference Include="mscorlib" />
         <Reference Include="OsuMemoryDataProvider, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
           <HintPath>..\packages\OsuMemoryDataProvider.0.10.0\lib\net472\OsuMemoryDataProvider.dll</HintPath>
+        </Reference>
+        <Reference Include="OsuParsers, Version=1.7.1.0, Culture=neutral, processorArchitecture=MSIL">
+          <HintPath>..\packages\OsuParsers.1.7.1\lib\netstandard2.0\OsuParsers.dll</HintPath>
         </Reference>
         <Reference Include="ProcessMemoryDataFinder, Version=0.8.5.0, Culture=neutral, processorArchitecture=MSIL">
           <HintPath>..\packages\ProcessMemoryDataFinder.0.8.5\lib\net472\ProcessMemoryDataFinder.dll</HintPath>
@@ -44,17 +48,23 @@
         <Reference Include="System.Core" />
         <Reference Include="System.Data" />
         <Reference Include="System.Data.DataSetExtensions" />
+        <Reference Include="System.Numerics" />
+        <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+          <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+        </Reference>
         <Reference Include="System.Xml" />
         <Reference Include="WindowsInput, Version=6.4.1.0, Culture=neutral, processorArchitecture=MSIL">
           <HintPath>..\packages\WindowsInput.6.4.1\lib\net461\WindowsInput.dll</HintPath>
         </Reference>
     </ItemGroup>
     <ItemGroup>
+        <Compile Include="BeatmapParser.cs" />
         <Compile Include="Config.cs" />
         <Compile Include="Program.cs" />
         <Compile Include="Properties\AssemblyInfo.cs" />
     </ItemGroup>
     <ItemGroup>
+      <None Include="App.config" />
       <None Include="packages.config" />
     </ItemGroup>
     <ItemGroup>
