@@ -23,12 +23,7 @@ namespace osu_auto_deafen
                 if (line.StartsWith("BeatmapDirectory"))
                 {
                     var songsFolder = line.Split('=')[1].Trim();
-                    // ToString :waaah:
-                    if (!songsFolder.Contains(Path.DirectorySeparatorChar.ToString()))
-                        _songsPath = Path.Combine(osuPath, songsFolder);
-                    else
-                        _songsPath = songsFolder;
-
+                    _songsPath = Path.IsPathRooted(songsFolder) ? songsFolder : Path.Combine(osuPath, songsFolder)
                     break;
                 }
             }
